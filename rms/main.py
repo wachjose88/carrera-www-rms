@@ -49,7 +49,9 @@ class RMS(QMainWindow):
         self.comp_duration = 0
         self.comp_starttime = datetime.now()
         self.tts = TTSHandler()
-        self.ttsthread = TTSThread(self.tts)
+        self.ttsthread = TTSThread(self.tts, self.database)
+        self.ttsthread.ttsoverride_changed.connect(
+            self.ttsthread.ttsoverride_changed_set)
         self.ttsthread.start()
         self.main_stack = QStackedWidget(self)
         self.qualifyingseq = QualifyingSeq(self)

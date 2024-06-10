@@ -3,7 +3,7 @@ import time
 import copy
 import locale
 import pyttsx3
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from utils import formattime
 
 
@@ -35,17 +35,24 @@ class TTSHandler():
 
 class TTSThread(QThread):
 
-    def __init__(self, handler):
+    ttsoverride_changed = pyqtSignal(str)
+
+    def __init__(self, handler, database):
         QThread.__init__(self)
         lang = locale.getlocale()[0][0:2]
         self.handler = handler
+        self.database = database
         self.engine = pyttsx3.init()
         voices = self.engine.getProperty('voices')
-        usev = 'english'
-        for voice in voices:
-            if lang in voice.languages[0].decode("utf-8"):
-                usev = voice.id
-        self.engine.setProperty('voice', usev)
+        ttsoverride = self.database.getConfigStr('TTSOVERRIDE')
+        if ttsoverride is not None and len(ttsoverride) > 0:
+            self.engine.setProperty('voice', ttsoverride)
+        else:
+            usev = 'english'
+            for voice in voices:
+                if lang in voice.languages[0].decode("utf-8"):
+                    usev = voice.id
+            self.engine.setProperty('voice', usev)
         rate = self.engine.getProperty('rate')
         self.engine.setProperty('rate', rate-43)
         self.stop = False
@@ -59,3 +66,7 @@ class TTSThread(QThread):
                 self.engine.runAndWait()
             except:
                 pass
+
+    @pyqtSlot(str)
+    def ttsoverride_changed_set(self, ttsoverride):
+        self.engine.setProperty('voice', ttsoverride)

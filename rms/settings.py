@@ -409,6 +409,18 @@ class CoreSet(QWidget):
         self.tracklength.setSizePolicy(QSizePolicy.Expanding,
                                        QSizePolicy.Maximum)
         self.mgrid.addWidget(self.tracklength, 1, 1)
+        self.ttsoverridelbl = QLabel(self.tr('TTS override: '))
+        self.ttsoverridelbl.setSizePolicy(QSizePolicy.Maximum,
+                                          QSizePolicy.Maximum)
+        self.mgrid.addWidget(self.ttsoverridelbl, 2, 0)
+        self.ttsoverride = QLineEdit()
+        tts = self.database.getConfigStr('TTSOVERRIDE')
+        if tts is not None:
+            self.ttsoverride.setText(tts)
+        self.ttsoverride.editingFinished.connect(self.ttsoverride_finished)
+        self.ttsoverride.setSizePolicy(QSizePolicy.Expanding,
+                                       QSizePolicy.Maximum)
+        self.mgrid.addWidget(self.ttsoverride, 2, 1)
         self.vml.addLayout(self.mgrid)
         self.vml.addWidget(HSep())
         self.dcs = QLabel(self.tr('Default Controller Settings:'))
@@ -436,6 +448,13 @@ class CoreSet(QWidget):
     def trackname_finished(self):
         tn = str(self.trackname.text()).strip()
         self.database.setConfig('TRACKNAME', tn)
+
+    @pyqtSlot()
+    def ttsoverride_finished(self):
+        tts = str(self.ttsoverride.text()).strip()
+        self.database.setConfig('TTSOVERRIDE', tts)
+        self.parent().parent().parent().parent().parent()\
+            .ttsthread.ttsoverride_changed.emit(tts)
 
 
 class SyncSet(QWidget):
