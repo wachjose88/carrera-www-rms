@@ -82,23 +82,29 @@ class LCD(Slots):
     def competition_progress_slot(self, results, mode):
         line_1 = [1, None, None]
         line_2 = [2, None, None]
-        num_1 = 0
-        second_1 = None
-        second_time = None
-
+        m_1 = []
         for addr, result in results.items():
+            if result['rank'] == 1:
+                m_1.append(addr)
+        if len(m_1) > 1:
+            result = results[m_1[0]]
             time = result['time']
             if mode == SORT_MODE__LAPTIME:
                 time = result['bestlap']
-            if result['rank'] == 1:
-                num_1 = num_1 + 1
-                if num_1 > 1:
-                    second_1 = result
-                    second_time = time
-                line_1 = [1, result["driver"]["name"], time]
-            if result['rank'] == 2:
-                line_2 = [2, result["driver"]["name"], time]
-        if second_1 is not None:
-            line_2 = [1, second_1["driver"]["name"], second_time]
+            line_1 = [1, result["driver"]["name"], time]
+            result = results[m_1[1]]
+            time = result['time']
+            if mode == SORT_MODE__LAPTIME:
+                time = result['bestlap']
+            line_2 = [2, result["driver"]["name"], time]
+        else:
+            for addr, result in results.items():
+                time = result['time']
+                if mode == SORT_MODE__LAPTIME:
+                    time = result['bestlap']
+                if result['rank'] == 1:
+                    line_1 = [1, result["driver"]["name"], time]
+                if result['rank'] == 2:
+                    line_2 = [2, result["driver"]["name"], time]
         self._print_time(0, line_1[0], line_1[1], line_1[2])
         self._print_time(1, line_2[0], line_2[1], line_2[2])
