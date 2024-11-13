@@ -96,7 +96,7 @@ class LCD(Slots):
             time = result['time']
             if mode == SORT_MODE__LAPTIME:
                 time = result['bestlap']
-            line_2 = [2, result["driver"]["name"], time]
+            line_2 = [1, result["driver"]["name"], time]
         else:
             for addr, result in results.items():
                 time = result['time']
