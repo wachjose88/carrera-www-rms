@@ -421,6 +421,38 @@ class CoreSet(QWidget):
         self.ttsoverride.setSizePolicy(QSizePolicy.Expanding,
                                        QSizePolicy.Maximum)
         self.mgrid.addWidget(self.ttsoverride, 2, 1)
+        self.laps_qualilbl = QLabel(self.tr('Default Qualifying Laps: '))
+        self.laps_qualilbl.setSizePolicy(QSizePolicy.Maximum,
+                                         QSizePolicy.Maximum)
+        self.mgrid.addWidget(self.laps_qualilbl, 3, 0)
+        self.laps_quali = QSpinBox()
+        self.laps_quali.setMinimum(1)
+        self.laps_quali.setMaximum(2147483647)
+        self.laps_quali.setSuffix(self.tr(' Laps'))
+        self.laps_quali.setValue(10)
+        lq = self.database.getConfigStr('LAPSQUALI')
+        if lq is not None:
+            self.laps_quali.setValue(int(lq))
+        self.laps_quali.editingFinished.connect(self.laps_quali_finished)
+        self.laps_quali.setSizePolicy(QSizePolicy.Expanding,
+                                      QSizePolicy.Maximum)
+        self.mgrid.addWidget(self.laps_quali, 3, 1)
+        self.laps_racelbl = QLabel(self.tr('Default Race Laps: '))
+        self.laps_racelbl.setSizePolicy(QSizePolicy.Maximum,
+                                        QSizePolicy.Maximum)
+        self.mgrid.addWidget(self.laps_racelbl, 4, 0)
+        self.laps_race = QSpinBox()
+        self.laps_race.setMinimum(1)
+        self.laps_race.setMaximum(2147483647)
+        self.laps_race.setSuffix(self.tr(' Laps'))
+        self.laps_race.setValue(20)
+        lr = self.database.getConfigStr('LAPSRACE')
+        if lr is not None:
+            self.laps_race.setValue(int(lr))
+        self.laps_race.editingFinished.connect(self.laps_race_finished)
+        self.laps_race.setSizePolicy(QSizePolicy.Expanding,
+                                     QSizePolicy.Maximum)
+        self.mgrid.addWidget(self.laps_race, 4, 1)
         self.vml.addLayout(self.mgrid)
         self.vml.addWidget(HSep())
         self.dcs = QLabel(self.tr('Default Controller Settings:'))
@@ -443,6 +475,20 @@ class CoreSet(QWidget):
     def tracklength_finished(self):
         tl = str(self.tracklength.value()).strip()
         self.database.setConfig('TRACKLENGTH', tl)
+
+    @pyqtSlot()
+    def laps_quali_finished(self):
+        ql = self.laps_quali.value()
+        self.database.setConfig('LAPSQUALI', str(ql).strip())
+        home = self.parent().parent().parent().parent().parent().home
+        home.qualifyingparams.complaps.duration.setValue(ql)
+
+    @pyqtSlot()
+    def laps_race_finished(self):
+        rl = self.laps_race.value()
+        self.database.setConfig('LAPSRACE', str(rl).strip())
+        home = self.parent().parent().parent().parent().parent().home
+        home.raceparams.complaps.duration.setValue(rl)
 
     @pyqtSlot()
     def trackname_finished(self):

@@ -32,7 +32,7 @@ class CompTime(QWidget):
 
 class CompLaps(QWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, default=20):
         super().__init__(parent)
         self.vbox = QVBoxLayout(self)
         self.dtext = QLabel(self.tr('Duration in laps'))
@@ -40,19 +40,19 @@ class CompLaps(QWidget):
         self.duration = QSpinBox()
         self.duration.setMinimum(1)
         self.duration.setSuffix(self.tr(' Laps'))
-        self.duration.setValue(20)
+        self.duration.setValue(default)
         self.vbox.addWidget(self.duration)
         self.setLayout(self.vbox)
 
 
 class RaceParams(QWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, default_laps=20):
         super().__init__(parent)
         self.vbox = QVBoxLayout(self)
         self.modetab = QTabWidget()
         self.vbox.addWidget(self.modetab)
-        self.complaps = CompLaps()
+        self.complaps = CompLaps(default=default_laps)
         self.modetab.addTab(self.complaps, self.tr('Laps'))
         self.comptime = CompTime()
         self.modetab.addTab(self.comptime, self.tr('Time'))
@@ -73,12 +73,12 @@ class RaceParams(QWidget):
 
 class QualifyingParams(QWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, default_laps=10):
         super().__init__(parent)
         self.vbox = QVBoxLayout(self)
         self.modetab = QTabWidget()
         self.vbox.addWidget(self.modetab)
-        self.complaps = CompLaps()
+        self.complaps = CompLaps(default=default_laps)
         self.modetab.addTab(self.complaps, self.tr('Laps'))
         self.comptime = CompTime()
         self.modetab.addTab(self.comptime, self.tr('Time'))
@@ -248,7 +248,12 @@ class Home(QWidget):
                                           QSizePolicy.Expanding)
         self.starts.addWidget(self.start_training)
         self.starts.addWidget(VSep())
-        self.qualifyingparams = QualifyingParams()
+        lq = self.database.getConfigStr('LAPSQUALI')
+        if lq is None:
+            lq = 10
+        else:
+            lq = int(lq)
+        self.qualifyingparams = QualifyingParams(default_laps=lq)
         self.qualifyingparams.setSizePolicy(QSizePolicy.Expanding,
                                             QSizePolicy.Maximum)
         self.qhbox = QVBoxLayout()
@@ -261,7 +266,12 @@ class Home(QWidget):
         self.qhbox.addWidget(self.start_qualifying)
         self.starts.addLayout(self.qhbox)
         self.starts.addWidget(VSep())
-        self.raceparams = RaceParams()
+        lr = self.database.getConfigStr('LAPSRACE')
+        if lr is None:
+            lr = 20
+        else:
+            lr = int(lr)
+        self.raceparams = RaceParams(default_laps=lr)
         self.raceparams.setSizePolicy(QSizePolicy.Expanding,
                                       QSizePolicy.Maximum)
         self.rhbox = QVBoxLayout()
